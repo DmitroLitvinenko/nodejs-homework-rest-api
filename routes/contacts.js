@@ -12,16 +12,17 @@ const validateBody = require("../middlewares/validateBody");
 
 router.get("/", ContactsController.getContacts);
 
-router.get("/:contactId", ContactsController.getContact);
+router.get("/:contactId", isValidId, ContactsController.getContact);
 
 router.post("/", validateBody, jsonParser, ContactsController.createContact);
 
-router.delete("/:contactId", ContactsController.deleteContact);
+router.delete("/:contactId", isValidId, ContactsController.deleteContact);
 
 router.put(
   "/:contactId",
-  jsonParser,
   isValidId,
+  validateBody,
+  jsonParser,
   ContactsController.updateContact
 );
 
