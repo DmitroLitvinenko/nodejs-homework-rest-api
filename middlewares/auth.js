@@ -17,17 +17,15 @@ function auth(req, res, next) {
     return res.status(401).send({ message: "Invalid token" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, async (err, decode) => {
+  jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decode) => {
     if (err) {
       return res.status(401).send({ message: "Invalid token" });
     }
 
     try {
-      req.user = decode;
-
       const user = await User.findById(decode.id).exec();
 
-      if (user === null) {
+      if (!user) {
         return res.status(401).send({ message: "Invalid token" });
       }
 
@@ -35,7 +33,7 @@ function auth(req, res, next) {
         return res.status(401).send({ message: "Invalid token" });
       }
 
-      req.user = { id: user._id, name: user.name };
+      req.user = { id: user.id, name: user.name }
 
       next();
     } catch (error) {
