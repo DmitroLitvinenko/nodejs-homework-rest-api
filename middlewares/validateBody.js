@@ -8,7 +8,7 @@ const contactSchema = Joi.object({
 
 const validateBody = (req, res, next) => {
   const { error } = contactSchema.validate(req.body);
-  if (!error) {
+  if (error) {
     return res.status(400).json({ message: "Missing fields" });
   }
   next();
