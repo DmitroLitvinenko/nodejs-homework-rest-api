@@ -79,4 +79,21 @@ async function logout(req, res, next) {
   }
 }
 
-module.exports = { register, login, logout };
+async function currentUser(req, res, next) {
+  try {
+    const user = await User.findById(req.user.id).exec();
+
+    if (!user) {
+      return res.status(401).send({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      email: user.email,
+      subscription: user.subscription,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { register, login, logout, currentUser };
