@@ -11,13 +11,11 @@ function auth(req, res, next) {
 
   const [bearer, token] = authHeader.split(" ", 2);
 
-  console.log({ bearer, token });
-
   if (bearer !== "Bearer") {
     return res.status(401).send({ message: "Invalid token" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, async (err, decode) => {
+  jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decode) => {
     if (err) {
       return res.status(401).send({ message: "Invalid token" });
     }

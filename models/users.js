@@ -8,6 +8,10 @@ const usersSchema = new mongoose.Schema(
       index: true,
       unique: true,
     },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+    },
     subscription: {
       type: String,
       enum: ["starter", "pro", "business"],

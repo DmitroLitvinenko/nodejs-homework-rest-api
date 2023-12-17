@@ -13,12 +13,20 @@ async function register(req, res, next) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({ email, password: hashedPassword });
-    return res.status(201).send({
-      user: { email: newUser.email, subscription: newUser.subscription },
+    const newUser = await User.create({
+      email,
+      password: hashedPassword,
+      subscription: "starter",
+    });
+
+    return res.status(201).json({
+      user: {
+        email: newUser.email,
+        password: newUser.password,
+        subscription: newUser.subscription,
+      },
     });
   } catch (error) {
-    next(error);
     return res.status(500).json({ message: "Server error" });
   }
 }
@@ -27,30 +35,37 @@ async function login(req, res, next) {
   const { email, password } = req.body;
 
   try {
-    const user = await User.find({ email }).exec();
-    if (user === null) {
-      return res
-        .status(401)
-        .send({ message: "Email or password is not found" });
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ message: "Email or password is wrong" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).send({ message: "Email or password is invalid" });
+      return res.status(401).json({ message: "Email or password is wrong" });
     }
 
     const token = jwt.sign(
-      { id: user._id, name: user.name },
+      { id: user._id, email: user.email },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
 
-    await User.findByIdAndUpdate(user._id, { token }).exec();
+    user.token = token;
+    await user.save();
 
-    res.send({ token });
+    return res.status(200).json({
+      token,
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+      },
+    });
   } catch (error) {
-    next(error);
+    console.log({ error: error.message });
+    return res.status(500).json({ message: "Server error" });
   }
 }
 
